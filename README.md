@@ -1,5 +1,7 @@
 # 🎮 QUIZ SEAS — Módulo 1 | Unidade 1
 
+![QUIZ SEAS](imagens/quiz-seas.png)
+
 ## 📚 Sobre o projeto
 
 O **QUIZ SEAS** é um jogo educativo desenvolvido em HTML, CSS e JavaScript, com o objetivo de auxiliar nos estudos sobre o Sistema Socioeducativo do Estado do Ceará.
