@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>[QUIZ SEAS] Módulo 1 - Unidade 1</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f2f5;
+  color: #222;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+h1 {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 2em;
+  color: #333;
+  margin: 10px 0 0 0;
+  text-align: center;
+}
+
+h2 {
+  font-family: 'Arial Black', Arial, sans-serif;
+  font-weight: bold;
+  font-size: 1.2em;
+  color: #555;
+  margin-top: 5px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+#flashcard-container {
+  background: #fff;
+  border-radius: 16px;
+  width: 600px;
+  max-width: 95%;
+  padding: 30px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  text-align: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  perspective: 1000px;
+}
+
+#flashcard {
+  width: 100%;
+  min-height: 120px;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+  cursor: pointer;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.card-face {
+  position: absolute;
+  width: 100%;
+  min-height: 120px;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backface-visibility: hidden;
+  border-radius: 10px;
+  font-size: 1.1em;
+  box-sizing: border-box;
+}
+
+.card-front { background-color: #fff; color: #222; }
+.card-back { background-color: #e8f0fe; color: #1a73e8; transform: rotateY(180deg); }
+#flashcard.flipped { transform: rotateY(180deg); }
+
+.card-buttons {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+button {
+  padding: 12px 20px;
+  font-size: 0.9em;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.1s, background-color 0.2s;
+}
+button:hover { transform: scale(1.05); }
+
+.btn-show { background-color: #1a73e8; color: white; }
+.btn-correct { background-color: #34a853; color: white; }
+.btn-wrong { background-color: #d93025; color: white; }
+
+.btn-nav {
+  background:#fbbc05;
+  color:#222;
+  font-weight:bold;
+  font-size:1.2em;
+  padding:12px 0;
+  border-radius:12px;
+  width:140px; /* Mesma largura para ambos os botões */
+  text-align:center;
+}
+
+#performance {
+  margin-top: 20px;
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #d93025;
+}
+
+#author {
+  margin-top: 25px;
+  font-size: 0.85em;
+  color: #888;
+  text-align: center;
+}
+
+#progress-container {
+  width: 100%;
+  background-color: #eee;
+  border-radius: 12px;
+  margin-bottom: 5px;
+  overflow: hidden;
+  height: 20px;
+}
+#progress-bar {
+  height: 100%;
+  background-color: #1a73e8;
+  width: 0%;
+  transition: width 0.3s;
+}
+#card-count { font-weight: bold; margin-bottom: 15px; }
+
+#timer { font-size: 1.1em; margin-bottom: 10px; color: #1a73e8; font-weight: bold; }
+
+#end-modal {
+  display: none;
+  position: fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+#end-modal-content {
+  background:#fff;
+  padding:30px;
+  border-radius:16px;
+  text-align:center;
+  max-width:400px;
+  width:90%;
+  box-shadow:0 6px 20px rgba(0,0,0,0.25);
+}
+
+@media(max-width: 700px){
+  #flashcard-container{ padding: 20px; }
+  button{ padding: 10px 16px; font-size: 0.8em; }
+  .btn-nav{ width:120px; }
+}
+</style>
+</head>
+<body>
+
+<h1>[QUIZ SEAS]</h1>
+<h2> Módulo 1 - Unidade 1</h2>
+
+<div id="flashcard-container">
+
+  <div id="progress-container">
+    <div id="progress-bar"></div>
+  </div>
+  <div id="card-count"></div>
+  <div id="timer">Tempo: 0s</div>
+
+  <div id="flashcard" onclick="flipCard()">
+    <div class="card-face card-front" id="question"></div>
+    <div class="card-face card-back" id="answer"></div>
+  </div>
+
+  <div class="card-buttons">
+    <button class="btn-show" onclick="showAnswer()">Mostrar Resposta</button>
+    <button class="btn-correct" onclick="mark(true)">Acertou</button>
+    <button class="btn-wrong" onclick="mark(false)">Errou</button>
+  </div>
+
+  <div class="card-buttons" style="margin-top:15px;">
+    <button class="btn-nav" onclick="prevCard()">&#8592; Voltar</button>
+    <button class="btn-nav" onclick="nextCard()">Avançar &#8594;</button>
+  </div>
+
+  <div id="performance"></div>
+  <div id="author">Desenvolvido por Alana Lucas 2026</div>
+</div>
+
+<div id="end-modal">
+  <div id="end-modal-content">
+    <h2>A prática leva à perfeição!</h2>
+    <p id="final-score"></p>
+    <p id="total-time"></p>
+    <button class="btn-nav" onclick="restart()">Reiniciar &#x21bb;</button>
+  </div>
+</div>
+
+<audio id="sound-correct" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
+<audio id="sound-wrong" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio>
+
+<script>
+const flashcards = [
+
+
+{q:"O que é a SEAS?", a:"É a Superintendência do Sistema Estadual de Atendimento Socioeducativo do Ceará, responsável pela implementação e gestão das medidas socioeducativas."},
+
+{q:"Qual lei criou a SEAS?", a:"Lei Estadual nº 16.040/2016."},
+
+{q:"Qual o principal objetivo da criação da SEAS?", a:"Garantir a gestão especializada da política socioeducativa e a proteção dos direitos de adolescentes em conflito com a lei."},
+
+{q:"A SEAS se articula com outras políticas públicas para:", a:"Promover atendimento integral e multidimensional aos adolescentes, incluindo saúde, educação e assistência social."},
+
+{q:"O que a Constituição Federal garante em relação às crianças e adolescentes?", a:"Princípios de direitos fundamentais e prioridade absoluta."},
+
+{q:"Qual é a função do Estatuto da Criança e do Adolescente (ECA)?", a:"Definir direitos específicos da infância e adolescência e orientar a execução das medidas socioeducativas."},
+
+{q:"O que regulamenta a Lei do SINASE?", a:"A execução das medidas socioeducativas em âmbito nacional, estabelecendo diretrizes, responsabilidades e organização do sistema."},
+
+{q:"Qual é a diferença entre ECA e SINASE?", a:"O ECA estabelece princípios gerais e direitos, enquanto o SINASE detalha a execução das medidas socioeducativas."},
+
+{q:"Socioeducação significa:", a:"Um processo educativo que responsabiliza adolescentes com base nos direitos humanos, promovendo reintegração social e cidadania."},
+
+{q:"A socioeducação se diferencia da punição porque:", a:"Visa à responsabilização com dignidade e à formação cidadã, não à repressão."},
+
+{q:"Qual é a base legal para a responsabilidade de adolescentes autores de atos infracionais?", a:"ECA (Lei nº 8.069/1990) e SINASE (Lei nº 12.594/2012)."}, 
+
+{q:"Qual é a prioridade das medidas socioeducativas?", a:"Garantir os direitos e a proteção integral do adolescente, promovendo educação e reintegração."},
+
+{q:"O que caracteriza a pedagogia da responsabilização?", a:"Responsabilizar o adolescente por seus atos de forma educativa, sem recorrer a punição ou violação de direitos."},
+
+{q:"O papel da SEAS na formação de profissionais é:", a:"Capacitar e supervisionar socioeducadores e demais profissionais para atuação conforme ECA e SINASE."},
+
+{q:"A SEAS é responsável por:", a:"Organizar unidades de internação e semiliberdade, formar profissionais e articular políticas socioeducativas."},
+
+{q:"Quais dimensões o SINASE organiza nas unidades socioeducativas?", a:"Dimensões técnica, administrativa e pedagógica."},
+
+{q:"O direito à educação na socioeducação é garantido por:", a:"ECA e SINASE, como parte do atendimento integral."},
+
+{q:"O que caracteriza a atuação do socioeducador?", a:"Atuar na execução de medidas socioeducativas, promovendo ressocialização e educação não formal."},
+
+{q:"Qual a diferença entre educador social e socioeducador?", a:"O educador social atua em contextos amplos e preventivos; o socioeducador atua no sistema socioeducativo com foco na ressocialização."},
+
+{q:"O que significa proteção integral?", a:"Garantia de todos os direitos da criança e do adolescente, incluindo educação, saúde, lazer e participação social."},
+
+{q:"O ECA assegura que adolescentes em medida de internação tenham:", a:"Acesso à educação, saúde, lazer, direitos humanos e reintegração social."},
+
+{q:"Quais princípios orientam a socioeducação?", a:"Legalidade, prioridade absoluta, proteção integral e direitos humanos."},
+
+{q:"A SEAS atua para superar:", a:"Práticas meramente punitivas, promovendo socioeducação com foco na responsabilização educativa."},
+
+{q:"O papel da articulação intersetorial na socioeducação é:", a:"Garantir que saúde, educação, assistência social e segurança atuem de forma integrada no atendimento."},
+
+{q:"A socioeducação tem vínculo com quais tipos de educação?", a:"Educação formal, não formal e cultural."},
+
+{q:"A socioeducação busca:", a:"Promover cidadania, autonomia e reintegração social do adolescente."},
+
+{q:"Segundo Maria da Glória Gohn, socioeducação é:", a:"Um processo formativo que ocorre em espaços coletivos e visa à participação crítica e cidadã."},
+
+{q:"O que a SEAS faz em relação às políticas pedagógicas?", a:"Elabora, implementa e supervisiona ações pedagógicas para a reintegração social do adolescente."},
+
+{q:"O SINASE detalha:", a:"Como as medidas socioeducativas devem ser executadas e quais responsabilidades os entes federativos possuem."},
+
+{q:"Qual é a função das medidas socioeducativas?", a:"Responsabilizar o adolescente de forma educativa, promovendo sua inclusão social e prevenção de reincidência."},
+
+{q:"O direito ao contraditório e à ampla defesa está previsto em:", a:"ECA e princípios constitucionais, garantindo legalidade no processo socioeducativo."},
+
+{q:"A ausência de escolarização formal na unidade socioeducativa:", a:"Contraria o ECA e o SINASE, prejudicando os objetivos pedagógicos da medida."},
+
+{q:"O socioeducador deve garantir:", a:"Cumprimento da medida socioeducativa com foco em direitos humanos e formação cidadã."},
+
+{q:"O educador social atua em:", a:"ONGs, projetos comunitários, escolas e instituições sociais, promovendo inclusão e cidadania."},
+
+{q:"O socioeducador atua em:", a:"Unidades de internação e semiliberdade, executando medidas socioeducativas previstas em lei."},
+
+{q:"Os direitos humanos na socioeducação servem para:", a:"Orientar limites das medidas, assegurando dignidade e inclusão do adolescente."},
+
+{q:"A responsabilidade educativa do adolescente deve ocorrer:", a:"Dentro dos parâmetros legais, com respeito à prioridade absoluta e proteção integral."},
+
+{q:"O foco da SEAS no atendimento é:", a:"Formação cidadã e socioeducativa, não contenção disciplinar."},
+
+{q:"O que diferencia SEAS do Serviço Especializado em Abordagem Social?", a:"A SEAS atua no sistema socioeducativo; o Serviço Especializado atua na proteção social de crianças e adolescentes em situação de rua."},
+
+{q:"O Marco Legal da SEAS inclui:", a:"Constituição Federal, ECA e Lei do SINASE."},
+
+{q:"O artigo 227 da Constituição Federal trata de:", a:"Garantia de direitos fundamentais e prioridade absoluta de crianças e adolescentes."},
+
+{q:"A articulação da SEAS com saúde e educação é importante porque:", a:"Garante atendimento integral e multidimensional ao adolescente."},
+
+{q:"A socioeducação deve priorizar:", a:"Respeito aos direitos humanos, reintegração social e formação cidadã."},
+
+{q:"O documento que detalha a execução das medidas socioeducativas no Brasil é:", a:"Lei do SINASE (Lei nº 12.594/2012)."}, 
+
+{q:"O que a SEAS garante nas unidades de internação e semiliberdade?", a:"Organização do atendimento, supervisão de profissionais e implementação de políticas pedagógicas."},
+
+{q:"A função da literatura carcerária na socioeducação é:", a:"Promover educação, expressão cultural e dignidade para pessoas privadas de liberdade."},
+
+{q:"Qual é a base normativa para todas as ações socioeducativas?", a:"Direitos humanos, ECA, SINASE e princípios constitucionais."},
+
+{q:"A educação não formal na socioeducação visa:", a:"Desenvolver aprendizagens significativas, participação ativa e construção coletiva do conhecimento."},
+
+{q:"A socioeducação busca formar:", a:"Indivíduos conscientes de seus direitos, capazes de atuar politicamente e socialmente."},
+
+{q:"Um desafio na execução da socioeducação é:", a:"Evitar práticas punitivas e garantir atendimento integral e pedagógico aos adolescentes."},
+
+
+//CONTINUAR
+
+
+{q:"O que significa responsabilização com dignidade na socioeducação?", a:"Tratar o adolescente de forma educativa, respeitando seus direitos e promovendo reintegração social."},
+
+{q:"Quais princípios a socioeducação deve respeitar na aplicação das medidas?", a:"Legalidade, prioridade absoluta, proteção integral e direitos humanos."},
+
+{q:"O que é pedagogia da responsabilização?", a:"Abordagem educativa que responsabiliza o adolescente sem recorrer à punição."},
+
+{q:"Qual é o papel do SINASE na formação dos profissionais socioeducativos?", a:"Estabelecer diretrizes para capacitação, supervisão e atuação conforme legislação."},
+
+{q:"O que a SEAS busca evitar no sistema socioeducativo?", a:"Práticas punitivas, abusos e violação de direitos."},
+
+{q:"Como a SEAS contribui para a justiça social?", a:"Promovendo medidas socioeducativas que garantem direitos, cidadania e reintegração."},
+
+{q:"O que é o Sistema Nacional de Atendimento Socioeducativo?", a:"Conjunto de normas, diretrizes e instituições que regulam a execução de medidas socioeducativas no Brasil."},
+
+{q:"Quais são as unidades geridas pela SEAS?", a:"Unidades de internação e semiliberdade."},
+
+{q:"Qual a função da articulação intersetorial na socioeducação?", a:"Integrar serviços de saúde, educação, assistência social e segurança para atendimento integral."},
+
+{q:"Por que é importante diferenciar socioeducador de educador social?", a:"Para compreender as funções específicas dentro do sistema socioeducativo e fora dele."},
+
+{q:"O que caracteriza a atuação do educador social?", a:"Trabalhar com educação não formal em ONGs, projetos comunitários e instituições sociais."},
+
+{q:"O que caracteriza a atuação do socioeducador?", a:"Aplicar medidas socioeducativas e promover ressocialização dentro do sistema socioeducativo."},
+
+{q:"O que garante a Constituição Federal sobre crianças e adolescentes?", a:"Prioridade absoluta, proteção integral e direitos fundamentais."},
+
+{q:"O que é prioridade absoluta?", a:"Dar prioridade total aos direitos e necessidades de crianças e adolescentes em políticas públicas."},
+
+{q:"Como a SEAS promove a reintegração social do adolescente?", a:"Por meio de educação, capacitação, atividades culturais e acompanhamento socioeducativo."},
+
+{q:"O que é educação não formal na socioeducação?", a:"Aprendizagem que ocorre fora da escola tradicional, em oficinas, projetos e atividades culturais."},
+
+{q:"Por que o ECA é considerado marco legal fundamental?", a:"Porque estabelece direitos específicos e princípios aplicáveis à infância e adolescência."},
+
+{q:"Qual a importância do SINASE para a execução das medidas?", a:"Detalhar procedimentos, responsabilidades e normas operacionais para o sistema socioeducativo."},
+
+{q:"O que a socioeducação busca substituir nas práticas tradicionais?", a:"Substituir punição e repressão por educação, responsabilização e reintegração."},
+
+{q:"O que significa proteção integral na socioeducação?", a:"Garantir todos os direitos do adolescente, sem negligenciar qualquer dimensão de sua vida."},
+
+{q:"O que é a política socioeducativa?", a:"Conjunto de ações públicas voltadas à responsabilização educativa e reintegração do adolescente."},
+
+{q:"Como a SEAS atua no contexto do Ceará?", a:"Implementando medidas socioeducativas, supervisionando profissionais e articulando políticas públicas."},
+
+{q:"Qual é a função da supervisão profissional na SEAS?", a:"Garantir que os socioeducadores atuem conforme legislação, princípios pedagógicos e direitos humanos."},
+
+{q:"O que caracteriza uma medida socioeducativa de internação?", a:"Privação temporária de liberdade, com foco em educação, reintegração e direitos do adolescente."},
+
+{q:"O que caracteriza a medida de semiliberdade?", a:"Adolescente cumpre a medida parcialmente fora da unidade, com acompanhamento socioeducativo e escolar."},
+
+{q:"Qual é o objetivo das oficinas de arte na socioeducação?", a:"Desenvolver habilidades, autoestima, expressão cultural e integração social."},
+
+{q:"O que a literatura carcerária contribui para a socioeducação?", a:"Promove expressão cultural, alfabetização e reflexão sobre direitos e cidadania."},
+
+{q:"Qual a relação entre socioeducação e direitos humanos?", a:"Os direitos humanos orientam limites, objetivos e práticas das medidas socioeducativas."},
+
+{q:"O que a SEAS garante no atendimento socioeducativo?", a:"Acompanhamento integral, formação profissional e implementação de políticas pedagógicas."},
+
+{q:"Por que o acesso à educação é essencial na socioeducação?", a:"Porque garante formação cidadã, oportunidades de reintegração e cumprimento do ECA e SINASE."},
+
+{q:"O que é o Marco Legal da SEAS?", a:"Conjunto de normas que inclui Constituição Federal, ECA e Lei do SINASE."},
+
+{q:"O que diferencia medidas socioeducativas de punições?", a:"As medidas são educativas e garantem direitos; punições são repressivas e coercitivas."},
+
+{q:"O que significa responsabilização educativa?", a:"Ensinar o adolescente a reconhecer consequências e reconstruir projetos de vida de forma cidadã."},
+
+{q:"Qual é a base da atuação socioeducativa?", a:"Direitos humanos, proteção integral, legalidade e pedagogia da responsabilização."},
+
+{q:"Por que a SEAS é importante para o Ceará?", a:"Centraliza a gestão do sistema socioeducativo, garantindo direitos e execução eficiente das medidas."},
+
+{q:"Como a socioeducação evita práticas punitivas?", a:"Promovendo educação, cultura, reintegração social e acompanhamento pedagógico."},
+
+{q:"O que é a educação social segundo Silva e Minayo?", a:"Processo que oferece alternativas formativas, construção de projetos de vida e reintegração social."},
+
+{q:"O que significa responsabilizar sem punir?", a:"Aplicar medidas educativas e restaurativas, respeitando direitos e dignidade do adolescente."},
+
+{q:"Quais são os principais desafios da socioeducação?", a:"Evitar punitivismo, garantir educação, formar profissionais e articular políticas públicas."},
+
+{q:"Por que a SEAS precisa articular-se com saúde mental?", a:"Para atender integralmente adolescentes em medida de internação, garantindo direitos e cuidados."},
+
+{q:"Como a SEAS atua em políticas de reintegração social?", a:"Oferecendo educação, oficinas, cultura, acompanhamento social e capacitação profissional."},
+
+{q:"O que significa atendimento multidimensional?", a:"Atender adolescentes considerando aspectos educativos, sociais, psicológicos e legais."},
+
+{q:"Qual a importância do acompanhamento pedagógico?", a:"Garantir que a medida socioeducativa cumpra objetivos educativos e de reintegração."},
+
+{q:"Como a socioeducação fortalece a cidadania?", a:"Desenvolvendo consciência crítica, participação social e responsabilidade cidadã."},
+
+{q:"O que distingue a SEAS de outros órgãos sociais?", a:"Foco exclusivo na execução e gestão de medidas socioeducativas em meio fechado e semiliberdade."},
+
+{q:"Por que a socioeducação é considerada transformadora?", a:"Porque promove mudanças educativas, sociais e culturais, fortalecendo direitos e autonomia."},
+
+{q:"Qual a função do socioeducador nas unidades?", a:"Executar medidas socioeducativas, promover educação, acompanhamento e reintegração."},
+
+{q:"O que significa execução normativa das medidas socioeducativas?", a:"Aplicar ações conforme legislação, diretrizes pedagógicas e princípios de direitos humanos."},
+
+{q:"Como o SINASE complementa o ECA?", a:"Determinando procedimentos operacionais, responsabilidades e organização do sistema socioeducativo."},
+
+{q:"O que é prioridade absoluta no atendimento socioeducativo?", a:"Dar prioridade total aos direitos e proteção integral do adolescente em todas as ações."},
+
+{q:"Como a SEAS contribui para a formação cidadã?", a:"Implementando atividades educativas, culturais e sociais que promovem responsabilidade e participação."},
+
+
+
+
+];
+
+let currentCard = 0;
+let correctCount = 0;
+let wrongCount = 0;
+let totalSeconds = 0;
+let timerInterval;
+
+// Elementos
+const q = document.getElementById('question');
+const a = document.getElementById('answer');
+const bar = document.getElementById('progress-bar');
+const count = document.getElementById('card-count');
+const perf = document.getElementById('performance');
+const modal = document.getElementById('end-modal');
+const finalScore = document.getElementById('final-score');
+const totalTimeDisplay = document.getElementById('total-time');
+const sc = document.getElementById('sound-correct');
+const sw = document.getElementById('sound-wrong');
+const timerDisplay = document.getElementById('timer');
+
+function showCard() {
+  q.textContent = flashcards[currentCard].q;
+  a.textContent = flashcards[currentCard].a;
+  document.getElementById('flashcard').classList.remove('flipped');
+  updateProgress();
+  updatePerformance();
+}
+
+function flipCard(){ document.getElementById('flashcard').classList.toggle('flipped'); }
+function showAnswer(){ document.getElementById('flashcard').classList.add('flipped'); }
+
+function nextCard() {
+  if (currentCard < flashcards.length - 1) {
+    currentCard++;
+    showCard();
+  } else {
+    endSession();
+  }
+}
+
+function prevCard() {
+  if (currentCard > 0) {
+    currentCard--;
+    showCard();
+  }
+}
+
+function mark(isCorrect) {
+  if(isCorrect){
+    correctCount++;
+    sc.play();
+  } else {
+    wrongCount++;
+    sw.play();
+  }
+  nextCard();
+}
+
+function updateProgress() {
+  bar.style.width = ((currentCard + 1)/flashcards.length*100)+"%";
+  count.textContent = `Card ${currentCard+1} de ${flashcards.length}`;
+}
+
+function updatePerformance() {
+  perf.textContent = `Acertos: ${correctCount} | Erros: ${wrongCount}`;
+}
+
+function restart() {
+  currentCard = 0;
+  correctCount = 0;
+  wrongCount = 0;
+  totalSeconds = 0;
+  flashcards.sort(() => Math.random()-0.5);
+  modal.style.display = 'none';
+  clearInterval(timerInterval);
+  timerInterval = setInterval(()=>{
+    totalSeconds++;
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    timerDisplay.textContent = `Tempo: ${minutes}m ${seconds}s`;
+  },1000);
+  showCard();
+}
+
+function endSession() {
+  clearInterval(timerInterval);
+  const pct = Math.round((correctCount/flashcards.length)*100);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  finalScore.textContent = `Aproveitamento: ${pct}%`;
+  totalTimeDisplay.textContent = `Tempo total: ${minutes}m ${seconds}s`;
+  modal.style.display = 'flex';
+}
+
+
+// Inicializa
+restart();
+</script>
+
+</body>
+</html>
