@@ -1,4 +1,4 @@
-# 🎮 QUIZ SEAS — Módulo 1 | Unidade 1
+# 🎮 QUIZ SEAS
 
 ![QUIZ SEAS](imagens/quiz-seas.png)
 
